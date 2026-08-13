@@ -4,16 +4,16 @@
 
 inline void playSfx(const Settings& settings, sf::Sound& sound)
 {
-    if (settings.soundOn) {
+    if (settings.isSoundOn()) {
         sound.play();
     }
 }
 
-// Останавливает один трек и запускает другой
+// Останавливает один трек и запускает другой.
 inline void switchMusic(const Settings& settings, sf::Music& stop, sf::Music& start)
 {
     stop.stop();
-    if (settings.musicOn && start.getStatus() != sf::Music::Playing) {
+    if (settings.isMusicOn() && start.getStatus() != sf::Music::Playing) {
         start.play();
     }
 }

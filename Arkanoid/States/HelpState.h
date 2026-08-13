@@ -1,4 +1,4 @@
-﻿// экран помощи
+﻿// экран помощи.
 #pragma once
 #include "../IState.h"
 #include "../GameContext.h"

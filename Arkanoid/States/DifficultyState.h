@@ -1,11 +1,11 @@
-﻿// сложность
+﻿// сложность.
 #pragma once
 #include "../IState.h"
 #include "../GameContext.h"
 #include "../Input.h"
 #include <SFML/Audio.hpp>
 
-// Выбор уровня сложности
+// Выбор уровня сложности.
 class DifficultyState : public IState {
 public:
     explicit DifficultyState(GameContext& context);

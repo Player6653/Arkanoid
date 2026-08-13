@@ -2,7 +2,7 @@
 #include <SFML/Audio.hpp>
 #include <memory>
 
-#include "Board.h"
+#include "GameState.h"
 #include "GameContext.h"
 #include "ResourceManager.h"
 #include "Leaderboard.h"
@@ -12,7 +12,7 @@
 
 int main()
 {
-    sf::RenderWindow window(sf::VideoMode(COLS * TILE_SIZE + UI_PANEL_WIDTH, ROWS * TILE_SIZE), "Tetris");
+    sf::RenderWindow window(sf::VideoMode(COLS * TILE_SIZE + UI_PANEL_WIDTH, ROWS * TILE_SIZE), "Arkanoid");
 
     ResourceManager resources;
     resources.loadAll();
@@ -38,7 +38,7 @@ int main()
         }
 
         sf::Time dt = clock.restart();
-        stateManager.update(dt);
+        stateManager.update(dt, window);
 
         if (stateManager.wantsExit()) {
             window.close();

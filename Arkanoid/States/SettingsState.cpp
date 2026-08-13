@@ -9,7 +9,7 @@
 SettingsState::SettingsState(GameContext& context)
     : m_context(context)
 {
-    m_toggleSound.setBuffer(m_context.resources.getSwapBuffer());
+    m_toggleSound.setBuffer(m_context.getResources().getSwapBuffer());
 }
 
 void SettingsState::handleInput(const sf::Event& event)
@@ -29,19 +29,19 @@ void SettingsState::handleInput(const sf::Event& event)
 
     switch (event.key.code) {
         case sf::Keyboard::S:
-            m_context.settings.soundOn = !m_context.settings.soundOn;
-            playSfx(m_context.settings, m_toggleSound); // сыграет, только если звук теперь вкл.
+            m_context.getSettings().toggleSound();
+            playSfx(m_context.getSettings(), m_toggleSound); // сыграет, только если звук теперь вкл.
             break;
 
         case sf::Keyboard::M:
-            m_context.settings.musicOn = !m_context.settings.musicOn;
-            if (m_context.settings.musicOn) {
-                playIfNotPlaying(m_context.resources.getMenuMusic());
+            m_context.getSettings().toggleMusic();
+            if (m_context.getSettings().isMusicOn()) {
+                playIfNotPlaying(m_context.getResources().getMenuMusic());
             }
             else {
-                m_context.resources.getMenuMusic().pause();
+                m_context.getResources().getMenuMusic().pause();
             }
-            playSfx(m_context.settings, m_toggleSound);
+            playSfx(m_context.getSettings(), m_toggleSound);
             break;
 
         default:
@@ -51,12 +51,12 @@ void SettingsState::handleInput(const sf::Event& event)
 
 void SettingsState::draw(sf::RenderWindow& window)
 {
-    const sf::Font& font = m_context.resources.getFont();
+    const sf::Font& font = m_context.getResources().getFont();
 
     drawText(window, font, "НАСТРОЙКИ", 40.f, 40.f, 32);
 
-    std::string sound = "Звук: " + std::string(m_context.settings.soundOn ? "ВКЛ" : "ВЫКЛ") + "  (S)";
-    std::string music = "Музыка: " + std::string(m_context.settings.musicOn ? "ВКЛ" : "ВЫКЛ") + "  (M)";
+    std::string sound = "Звук: " + std::string(m_context.getSettings().isSoundOn() ? "ВКЛ" : "ВЫКЛ") + "  (S)";
+    std::string music = "Музыка: " + std::string(m_context.getSettings().isMusicOn() ? "ВКЛ" : "ВЫКЛ") + "  (M)";
     drawText(window, font, sound, 40.f, 140.f, 24);
     drawText(window, font, music, 40.f, 180.f, 24);
 

@@ -26,7 +26,7 @@ void Leaderboard::save(const std::string& filePath)
 {
     std::ofstream file(filePath);
     for (const HighscoreEntry& entry : m_entries) {
-        file << entry.name << " " << entry.score << "\n";
+        file << entry.getName() << " " << entry.getScore() << "\n";
     }
 }
 
@@ -40,7 +40,7 @@ void Leaderboard::sortByScoreDescending()
 {
     std::sort(m_entries.begin(), m_entries.end(),
         [](const HighscoreEntry& a, const HighscoreEntry& b) {
-            return a.score > b.score;
+            return a.getScore() > b.getScore();
         });
 }
 

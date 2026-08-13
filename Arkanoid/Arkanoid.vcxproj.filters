@@ -10,7 +10,13 @@
     <ClCompile Include="GameMain.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
-    <ClCompile Include="Board.cpp">
+    <ClCompile Include="GameState.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Paddle.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Ball.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
     <ClCompile Include="States\DifficultyState.cpp">
@@ -40,15 +46,18 @@
     <ClCompile Include="StateManager.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
-    <ClCompile Include="Tetromino.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
     <ClCompile Include="States\HelpState.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Board.h">
+    <ClInclude Include="GameState.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="Paddle.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="Ball.h">
       <Filter>Sources</Filter>
     </ClInclude>
     <ClInclude Include="States\DifficultyState.h">
@@ -85,9 +94,6 @@
       <Filter>Sources</Filter>
     </ClInclude>
     <ClInclude Include="StateManager.h">
-      <Filter>Sources</Filter>
-    </ClInclude>
-    <ClInclude Include="Tetromino.h">
       <Filter>Sources</Filter>
     </ClInclude>
     <ClInclude Include="UiText.h">

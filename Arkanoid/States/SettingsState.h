@@ -1,4 +1,4 @@
-﻿// States/SettingsState.h — экран настроек (звук/музыка)
+﻿// States/SettingsState.h — экран настроек (звук/музыка).
 #pragma once
 #include "../IState.h"
 #include "../GameContext.h"

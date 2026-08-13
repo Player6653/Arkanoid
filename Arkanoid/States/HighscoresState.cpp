@@ -24,8 +24,8 @@ void HighscoresState::handleInput(const sf::Event& event)
 
 void HighscoresState::draw(sf::RenderWindow& window)
 {
-    const sf::Font& font = m_context.resources.getFont();
-    const std::vector<HighscoreEntry>& entries = m_context.leaderboard.getEntries();
+    const sf::Font& font = m_context.getResources().getFont();
+    const std::vector<HighscoreEntry>& entries = m_context.getLeaderboard().getEntries();
 
     drawText(window, font, "ТАБЛИЦА РЕКОРДОВ", 40.f, 40.f, 32);
 
@@ -39,7 +39,7 @@ void HighscoresState::draw(sf::RenderWindow& window)
             if (shown >= 8) {
                 break;
             }
-            std::string line = std::to_string(shown + 1) + ". " + entry.name + " - " + std::to_string(entry.score);
+            std::string line = std::to_string(shown + 1) + ". " + entry.getName() + " - " + std::to_string(entry.getScore());
             drawText(window, font, line, 40.f, y, 20);
             y += 30.f;
             ++shown;

@@ -1,11 +1,22 @@
-﻿// таблица рекордов
+﻿// таблица рекордов.
 #pragma once
 #include <string>
 #include <vector>
 
-struct HighscoreEntry {
-    std::string name;
-    int score = 0;
+class HighscoreEntry {
+public:
+    HighscoreEntry(std::string name, int score)
+        : m_name(std::move(name))
+        , m_score(score)
+    {
+    }
+
+    const std::string& getName() const { return m_name; }
+    int getScore() const { return m_score; }
+
+private:
+    std::string m_name;
+    int m_score = 0;
 };
 
 class Leaderboard {

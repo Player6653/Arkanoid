@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include <SFML/Graphics.hpp>
 #include <string>
-#include "Board.h"
+#include "GameState.h"
 
 inline void drawText(sf::RenderWindow& window, const sf::Font& font, const std::string& text,
     float x, float y, unsigned int size = 20, sf::Color color = sf::Color::White)

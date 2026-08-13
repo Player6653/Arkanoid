@@ -179,11 +179,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="GameMain.cpp" />
-    <ClCompile Include="Board.cpp" />
+    <ClCompile Include="GameState.cpp" />
+    <ClCompile Include="Paddle.cpp" />
+    <ClCompile Include="Ball.cpp" />
     <ClCompile Include="StateManager.cpp" />
     <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="Leaderboard.cpp" />
-    <ClCompile Include="Tetromino.cpp" />
     <ClCompile Include="States\MenuState.cpp" />
     <ClCompile Include="States\SettingsState.cpp" />
     <ClCompile Include="States\DifficultyState.cpp" />
@@ -193,14 +194,15 @@
     <ClCompile Include="States\HelpState.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Board.h" />
+    <ClInclude Include="GameState.h" />
+    <ClInclude Include="Paddle.h" />
+    <ClInclude Include="Ball.h" />
     <ClInclude Include="IState.h" />
     <ClInclude Include="Settings.h" />
     <ClInclude Include="GameContext.h" />
     <ClInclude Include="StateManager.h" />
     <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="Leaderboard.h" />
-    <ClInclude Include="Tetromino.h" />
     <ClInclude Include="UiText.h" />
     <ClInclude Include="Audio.h" />
     <ClInclude Include="Input.h" />

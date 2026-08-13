@@ -1,4 +1,4 @@
-﻿// хранит текущее состояние
+﻿// хранит текущее состояние.
 #pragma once
 #include "IState.h"
 #include <memory>
@@ -9,7 +9,7 @@ public:
     explicit StateManager(std::unique_ptr<IState> initialState);
 
     void handleInput(const sf::Event& event);
-    void update(sf::Time dt);
+    void update(sf::Time dt, const sf::RenderWindow& window);
     void draw(sf::RenderWindow& window);
     bool wantsExit() const { return m_current->wantsExit(); }
 

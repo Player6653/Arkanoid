@@ -1,11 +1,10 @@
-﻿// ResourceManager.h — класс, который грузит и хранит все текстуры/шрифты/звуки игры
+﻿// ResourceManager.h — класс, который грузит и хранит все текстуры/шрифты/звуки игры.
 #pragma once
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 
 class ResourceManager {
 public:
-    // Грузит шрифт, звуковые эффекты и музыку (см. ResourceManager.cpp).
     void loadAll();
 
     sf::Font& getFont();

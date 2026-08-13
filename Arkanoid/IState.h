@@ -9,7 +9,7 @@ public:
     virtual void handleInput(const sf::Event& event) = 0;
     virtual void draw(sf::RenderWindow& window) = 0;
 
-    virtual void update(sf::Time dt) {}
+    virtual void update(sf::Time dt, const sf::RenderWindow& window) {}
 
     virtual std::unique_ptr<IState> nextState() { return nullptr; }
 

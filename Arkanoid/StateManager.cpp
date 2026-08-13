@@ -7,19 +7,19 @@ StateManager::StateManager(std::unique_ptr<IState> initialState)
 
 void StateManager::handleInput(const sf::Event& event)
 {
-    // Просто отдаём событие тому состоянию, которое сейчас активно.
+    // событие, которое сейчас активно.
     m_current->handleInput(event);
 }
 
 void StateManager::draw(sf::RenderWindow& window)
 {
-    // просто делегируем отрисовку текущему состоянию.
+    // отрисовка.
     m_current->draw(window);
 }
 
-void StateManager::update(sf::Time dt)
+void StateManager::update(sf::Time dt, const sf::RenderWindow& window)
 {
-    m_current->update(dt);
+    m_current->update(dt, window);
 
     std::unique_ptr<IState> next = m_current->nextState();
 

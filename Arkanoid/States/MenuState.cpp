@@ -12,10 +12,10 @@
 MenuState::MenuState(GameContext& context)
     : m_context(context)
 {
-    m_moveSound.setBuffer(m_context.resources.getRotateBuffer());
-    m_confirmSound.setBuffer(m_context.resources.getLineClearBuffer());
+    m_moveSound.setBuffer(m_context.getResources().getRotateBuffer());
+    m_confirmSound.setBuffer(m_context.getResources().getLineClearBuffer());
 
-    switchMusic(m_context.settings, m_context.resources.getGameplayMusic(), m_context.resources.getMenuMusic());
+    switchMusic(m_context.getSettings(), m_context.getResources().getGameplayMusic(), m_context.getResources().getMenuMusic());
 }
 
 void MenuState::moveSelection(int direction)
@@ -24,7 +24,7 @@ void MenuState::moveSelection(int direction)
     index = (index + direction + ITEM_COUNT) % ITEM_COUNT;
     m_selected = static_cast<MenuItem>(index);
 
-    playSfx(m_context.settings, m_moveSound);
+    playSfx(m_context.getSettings(), m_moveSound);
 }
 
 const char* MenuState::itemLabel(MenuItem item)
@@ -67,7 +67,7 @@ void MenuState::handleInput(const sf::Event& event)
                 m_exitRequested = true;
             }
             else {
-                playSfx(m_context.settings, m_confirmSound);
+                playSfx(m_context.getSettings(), m_confirmSound);
                 m_confirmed = true;
             }
             break;
@@ -79,9 +79,9 @@ void MenuState::handleInput(const sf::Event& event)
 
 void MenuState::draw(sf::RenderWindow& window)
 {
-    const sf::Font& font = m_context.resources.getFont();
+    const sf::Font& font = m_context.getResources().getFont();
 
-    drawText(window, font, "ТЕТРИС", 40.f, 40.f, 36);
+    drawText(window, font, "АРКАНОИД", 40.f, 40.f, 36);
 
     float y = 140.f;
     for (int i = 0; i < ITEM_COUNT; ++i) {
@@ -101,7 +101,7 @@ std::unique_ptr<IState> MenuState::nextState()
 
     switch (m_selected) {
         case MenuItem::StartGame:
-            return std::make_unique<PlayingState>(m_context, m_context.settings.difficulty);
+            return std::make_unique<PlayingState>(m_context, m_context.getSettings().getDifficulty());
         case MenuItem::Difficulty:
             return std::make_unique<DifficultyState>(m_context);
         case MenuItem::Highscores:

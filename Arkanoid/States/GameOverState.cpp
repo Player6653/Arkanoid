@@ -10,7 +10,7 @@
 
 namespace {
     const sf::Uint32 BACKSPACE = 8;
-    const int MAX_NAME_LENGTH = 12; // в символах
+    const int MAX_NAME_LENGTH = 12; // в символах.
 
     // Можно по русски писать.
     bool isAllowedNameChar(sf::Uint32 unicode)
@@ -37,10 +37,10 @@ GameOverState::GameOverState(GameContext& context, int finalScore)
     : m_context(context)
     , m_finalScore(finalScore)
 {
-    m_context.resources.getGameplayMusic().stop();
+    m_context.getResources().getGameplayMusic().stop();
 
-    m_gameOverSound.setBuffer(m_context.resources.getGameOverBuffer());
-    playSfx(m_context.settings, m_gameOverSound);
+    m_gameOverSound.setBuffer(m_context.getResources().getGameOverBuffer());
+    playSfx(m_context.getSettings(), m_gameOverSound);
 }
 
 void GameOverState::handleInput(const sf::Event& event)
@@ -61,7 +61,7 @@ void GameOverState::handleInput(const sf::Event& event)
     }
     else if (event.type == sf::Event::KeyPressed) {
         if (event.key.code == sf::Keyboard::Enter && !m_enteredName.empty() && !m_confirmed) {
-            m_context.leaderboard.addEntry(m_enteredName, m_finalScore);
+            m_context.getLeaderboard().addEntry(m_enteredName, m_finalScore);
             m_confirmed = true;
         }
     }
@@ -69,7 +69,7 @@ void GameOverState::handleInput(const sf::Event& event)
 
 void GameOverState::draw(sf::RenderWindow& window)
 {
-    const sf::Font& font = m_context.resources.getFont();
+    const sf::Font& font = m_context.getResources().getFont();
 
     drawText(window, font, "ИГРА ОКОНЧЕНА", 40.f, 40.f, 36, sf::Color::Red);
     drawText(window, font, "Счёт: " + std::to_string(m_finalScore), 40.f, 100.f, 24);

@@ -1,12 +1,40 @@
-﻿// общие пользовательские настройки 
+﻿// общие пользовательские настройки
 #pragma once
 
-struct Settings {
-    bool soundOn = true;
-    bool musicOn = true;
+class Settings {
+public:
+    bool isSoundOn() const { return m_soundOn; }
+    bool isMusicOn() const { return m_musicOn; }
+    int getDifficulty() const { return m_difficulty; }
+
+    void toggleSound() { m_soundOn = !m_soundOn; }
+    void toggleMusic() { m_musicOn = !m_musicOn; }
+
+    // Возвращают true, только если значение реально изменилось.
+    bool increaseDifficulty()
+    {
+        if (m_difficulty < 3) {
+            ++m_difficulty;
+            return true;
+        }
+        return false;
+    }
+
+    bool decreaseDifficulty()
+    {
+        if (m_difficulty > 1) {
+            --m_difficulty;
+            return true;
+        }
+        return false;
+    }
+
+private:
+    bool m_soundOn = true;
+    bool m_musicOn = true;
 
     // 1 - легко, 2 - средне, 3 - сложно
-    int difficulty = 1;
+    int m_difficulty = 1;
 };
 
 inline const char* difficultyName(int difficulty)
