@@ -1,15 +1,24 @@
 ﻿#include "PlayingState.h"
 #include "GameOverState.h"
+#include "WinState.h"
 #include "MenuState.h"
 #include "../ResourceManager.h"
 #include "../UiText.h"
 #include "../Audio.h"
 #include "../Settings.h"
+#include <cmath>
 #include <string>
+
+namespace {
+    // Совпадают с координатами пунктов меню паузы в drawPauseOverlay().
+    const float PAUSE_ITEM_START_Y = 270.f;
+    const float PAUSE_ITEM_SPACING = 40.f;
+    const float PAUSE_ITEM_CLICK_HEIGHT = 32.f;
+}
 
 PlayingState::PlayingState(GameContext& context, int difficulty)
     : m_context(context)
-    , m_gameState(difficulty)
+    , m_gameState(difficulty, context.getSettings().getBrickRows())
 {
     m_level = difficulty;
 
@@ -26,8 +35,13 @@ void PlayingState::setPaused(bool paused)
     if (m_paused) {
         m_context.getResources().getGameplayMusic().pause();
     }
-    else if (m_context.getSettings().isMusicOn()) {
-        playIfNotPlaying(m_context.getResources().getGameplayMusic());
+    else {
+        // Пока была пауза, Paddle::update() не вызывался и не видел, как двигалась мышька.
+        m_gameState.requestPaddleMouseResync();
+
+        if (m_context.getSettings().isMusicOn()) {
+            playIfNotPlaying(m_context.getResources().getGameplayMusic());
+        }
     }
 }
 
@@ -84,8 +98,42 @@ std::string PlayingState::pauseItemLabel(PauseItem item) const
     return "";
 }
 
+int PlayingState::pauseItemIndexAt(int mouseY) const
+{
+    for (int i = 0; i < PAUSE_ITEM_COUNT; ++i) {
+        float top = PAUSE_ITEM_START_Y + i * PAUSE_ITEM_SPACING;
+        if (mouseY >= top && mouseY < top + PAUSE_ITEM_CLICK_HEIGHT) {
+            return i;
+        }
+    }
+    return -1;
+}
+
 void PlayingState::handlePausedInput(const sf::Event& event)
 {
+    if (event.type == sf::Event::MouseMoved) {
+        int index = pauseItemIndexAt(event.mouseMove.y);
+        if (index >= 0) {
+            m_pauseSelected = static_cast<PauseItem>(index);
+        }
+        return;
+    }
+
+    if (event.type == sf::Event::MouseButtonPressed) {
+        if (event.mouseButton.button == sf::Mouse::Right) {
+            setPaused(false);
+            return;
+        }
+        if (event.mouseButton.button == sf::Mouse::Left) {
+            int index = pauseItemIndexAt(event.mouseButton.y);
+            if (index >= 0) {
+                m_pauseSelected = static_cast<PauseItem>(index);
+                activatePauseSelection();
+            }
+        }
+        return;
+    }
+
     if (event.type != sf::Event::KeyPressed) {
         return;
     }
@@ -158,8 +206,16 @@ void PlayingState::update(sf::Time dt, const sf::RenderWindow& window)
 
     m_gameState.update(dt, window);
 
+    if (m_gameState.wasBrickDestroyed()) {
+        // Лёгкая x1, средняя x1.25, сложная x1.5 — округляем, а не отбрасываем.
+        m_score += static_cast<int>(std::round(SCORE_PER_BRICK * difficultyScoreMultiplier(m_level)));
+    }
+
     if (m_gameState.isBallLost()) {
         m_gameOver = true;
+    }
+    else if (m_gameState.areAllBricksDestroyed()) {
+        m_won = true;
     }
 }
 
@@ -196,22 +252,26 @@ void PlayingState::drawPauseOverlay(sf::RenderWindow& window)
 
     const sf::Font& font = m_context.getResources().getFont();
     float x = 60.f;
-    float y = 200.f;
 
-    drawText(window, font, "ПАУЗА", x, y, 36);
-    y += 70.f;
+    drawText(window, font, "ПАУЗА", x, 200.f, 36);
 
     for (int i = 0; i < PAUSE_ITEM_COUNT; ++i) {
         PauseItem item = static_cast<PauseItem>(i);
         bool selected = (item == m_pauseSelected);
         std::string text = (selected ? "> " : "  ") + pauseItemLabel(item);
+        float y = PAUSE_ITEM_START_Y + i * PAUSE_ITEM_SPACING;
         drawText(window, font, text, x, y, 24, selected ? sf::Color::Yellow : sf::Color::White);
-        y += 40.f;
     }
+
+    drawText(window, font, "ПКМ — продолжить игру",
+        x, PAUSE_ITEM_START_Y + PAUSE_ITEM_COUNT * PAUSE_ITEM_SPACING + 20.f, 16, sf::Color(180, 180, 180));
 }
 
 std::unique_ptr<IState> PlayingState::nextState()
 {
+    if (m_won) {
+        return std::make_unique<WinState>(m_context, m_score);
+    }
     if (m_gameOver) {
         return std::make_unique<GameOverState>(m_context, m_score);
     }

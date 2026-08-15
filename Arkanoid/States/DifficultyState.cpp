@@ -4,7 +4,15 @@
 #include "../UiText.h"
 #include "../Input.h"
 #include "../Audio.h"
+#include "../Settings.h"
 #include <string>
+
+namespace {
+    // Совпадают с координатами строк в draw().
+    const float ITEM_START_Y = 140.f;
+    const float ITEM_SPACING = 40.f;
+    const float ITEM_CLICK_HEIGHT = 32.f;
+}
 
 DifficultyState::DifficultyState(GameContext& context)
     : m_context(context)
@@ -12,9 +20,84 @@ DifficultyState::DifficultyState(GameContext& context)
     m_changeSound.setBuffer(m_context.getResources().getSwapBuffer());
 }
 
+void DifficultyState::moveSelection(int direction)
+{
+    int index = static_cast<int>(m_selectedItem);
+    index = (index + direction + ITEM_COUNT) % ITEM_COUNT;
+    m_selectedItem = static_cast<SelectedItem>(index);
+
+    playSfx(m_context.getSettings(), m_changeSound);
+}
+
+void DifficultyState::changeValue(int direction)
+{
+    if (m_selectedItem == SelectedItem::Difficulty) {
+        if (direction < 0) {
+            m_context.getSettings().decreaseDifficulty();
+        }
+        else {
+            m_context.getSettings().increaseDifficulty();
+        }
+    }
+    else {
+        if (direction < 0) {
+            m_context.getSettings().decreaseBrickRows();
+        }
+        else {
+            m_context.getSettings().increaseBrickRows();
+        }
+    }
+
+    // Значение зациклено и меняется всегда, так что звук играет на каждый клик.
+    playSfx(m_context.getSettings(), m_changeSound);
+}
+
+int DifficultyState::itemIndexAt(int mouseY) const
+{
+    for (int i = 0; i < ITEM_COUNT; ++i) {
+        float top = ITEM_START_Y + i * ITEM_SPACING;
+        if (mouseY >= top && mouseY < top + ITEM_CLICK_HEIGHT) {
+            return i;
+        }
+    }
+    return -1;
+}
+
 void DifficultyState::handleInput(const sf::Event& event)
 {
     if (!m_staleKeys.accept(event)) {
+        return;
+    }
+
+    if (event.type == sf::Event::MouseMoved) {
+        int index = itemIndexAt(event.mouseMove.y);
+        if (index >= 0) {
+            m_selectedItem = static_cast<SelectedItem>(index);
+        }
+        return;
+    }
+
+    if (event.type == sf::Event::MouseButtonPressed) {
+        if (event.mouseButton.button == sf::Mouse::Right) {
+            m_backRequested = true;
+            return;
+        }
+        if (event.mouseButton.button == sf::Mouse::Left) {
+            int index = itemIndexAt(event.mouseButton.y);
+            if (index >= 0) {
+                m_selectedItem = static_cast<SelectedItem>(index);
+                changeValue(1);
+            }
+        }
+        return;
+    }
+
+    if (event.type == sf::Event::MouseWheelScrolled) {
+        int index = itemIndexAt(event.mouseWheelScroll.y);
+        if (index >= 0) {
+            m_selectedItem = static_cast<SelectedItem>(index);
+            changeValue(event.mouseWheelScroll.delta > 0.f ? 1 : -1);
+        }
         return;
     }
 
@@ -30,16 +113,22 @@ void DifficultyState::handleInput(const sf::Event& event)
     switch (event.key.code) {
         case sf::Keyboard::Up:
         case sf::Keyboard::W:
-            if (m_context.getSettings().decreaseDifficulty()) {
-                playSfx(m_context.getSettings(), m_changeSound);
-            }
+            moveSelection(-1);
             break;
 
         case sf::Keyboard::Down:
         case sf::Keyboard::S:
-            if (m_context.getSettings().increaseDifficulty()) {
-                playSfx(m_context.getSettings(), m_changeSound);
-            }
+            moveSelection(1);
+            break;
+
+        case sf::Keyboard::Left:
+        case sf::Keyboard::A:
+            changeValue(-1);
+            break;
+
+        case sf::Keyboard::Right:
+        case sf::Keyboard::D:
+            changeValue(1);
             break;
 
         default:
@@ -50,22 +139,30 @@ void DifficultyState::handleInput(const sf::Event& event)
 void DifficultyState::draw(sf::RenderWindow& window)
 {
     const sf::Font& font = m_context.getResources().getFont();
-    const char* labels[3] = {
-        "1) Лёгкий  - медленный шарик",
-        "2) Средний - средняя скорость шарика",
-        "3) Сложный - быстрый шарик"
-    };
 
     drawText(window, font, "СЛОЖНОСТЬ", 40.f, 40.f, 32);
 
-    for (int i = 0; i < 3; ++i) {
-        bool selected = (m_context.getSettings().getDifficulty() == i + 1);
-        drawText(window, font, labels[i], 40.f, 140.f + i * 40.f, 18,
-            selected ? sf::Color::Yellow : sf::Color::White);
-    }
+    const char* multiplierLabels[3] = { "x1", "x1.25", "x1.5" };
+    int difficultyIndex = m_context.getSettings().getDifficulty() - 1; // 0-2
 
-    drawText(window, font, "Сложность влияет на скорость шарика.", 40.f, 290.f, 16, sf::Color(180, 180, 180));
-    drawText(window, font, "Вверх/вниз - менять, Esc/Enter/Space - назад", 40.f, 350.f, 16, sf::Color(180, 180, 180));
+    bool difficultySelected = (m_selectedItem == SelectedItem::Difficulty);
+    std::string difficultyLine = std::string(difficultySelected ? "> " : "  ")
+        + "Сложность: " + difficultyName(m_context.getSettings().getDifficulty())
+        + " (очки " + multiplierLabels[difficultyIndex] + ")";
+    drawText(window, font, difficultyLine, 40.f, ITEM_START_Y, 22,
+        difficultySelected ? sf::Color::Yellow : sf::Color::White);
+
+    bool brickRowsSelected = (m_selectedItem == SelectedItem::BrickRows);
+    std::string brickRowsLine = std::string(brickRowsSelected ? "> " : "  ")
+        + "Рядов блоков: " + std::to_string(m_context.getSettings().getBrickRows()) + " / 10";
+    drawText(window, font, brickRowsLine, 40.f, ITEM_START_Y + ITEM_SPACING, 22,
+        brickRowsSelected ? sf::Color::Yellow : sf::Color::White);
+
+    drawText(window, font, "Сложность влияет на скорость шарика.", 40.f, 260.f, 16, sf::Color(180, 180, 180));
+    drawText(window, font, "Больше рядов блоков — длиннее партия.", 40.f, 280.f, 16, sf::Color(180, 180, 180));
+    drawText(window, font, "Вверх/вниз — выбор пункта, влево/вправо — изменить значение", 40.f, 340.f, 16, sf::Color(180, 180, 180));
+    drawText(window, font, "Мышь: клик ЛКМ увеличивает, колесо — оба направления", 40.f, 360.f, 16, sf::Color(180, 180, 180));
+    drawText(window, font, "Esc/Enter/Space/ПКМ — назад", 40.f, 380.f, 16, sf::Color(180, 180, 180));
 }
 
 std::unique_ptr<IState> DifficultyState::nextState()

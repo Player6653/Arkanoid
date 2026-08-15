@@ -1,5 +1,4 @@
-﻿// ResourceManager.h — класс, который грузит и хранит все текстуры/шрифты/звуки игры.
-#pragma once
+﻿#pragma once
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 

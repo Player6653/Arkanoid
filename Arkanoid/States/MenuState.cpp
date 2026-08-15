@@ -9,6 +9,13 @@
 #include "../Audio.h"
 #include <string>
 
+namespace {
+    // Эти же значения использует draw() для расположения пунктов.
+    const float ITEM_START_Y = 140.f;
+    const float ITEM_SPACING = 40.f;
+    const float ITEM_CLICK_HEIGHT = 32.f;
+}
+
 MenuState::MenuState(GameContext& context)
     : m_context(context)
 {
@@ -25,6 +32,28 @@ void MenuState::moveSelection(int direction)
     m_selected = static_cast<MenuItem>(index);
 
     playSfx(m_context.getSettings(), m_moveSound);
+}
+
+void MenuState::activateSelected()
+{
+    if (m_selected == MenuItem::Exit) {
+        m_exitRequested = true;
+    }
+    else {
+        playSfx(m_context.getSettings(), m_confirmSound);
+        m_confirmed = true;
+    }
+}
+
+int MenuState::itemIndexAt(int mouseY) const
+{
+    for (int i = 0; i < ITEM_COUNT; ++i) {
+        float top = ITEM_START_Y + i * ITEM_SPACING;
+        if (mouseY >= top && mouseY < top + ITEM_CLICK_HEIGHT) {
+            return i;
+        }
+    }
+    return -1;
 }
 
 const char* MenuState::itemLabel(MenuItem item)
@@ -46,6 +75,25 @@ void MenuState::handleInput(const sf::Event& event)
         return;
     }
 
+    if (event.type == sf::Event::MouseMoved) {
+        int index = itemIndexAt(event.mouseMove.y);
+        if (index >= 0) {
+            m_selected = static_cast<MenuItem>(index);
+        }
+        return;
+    }
+
+    if (event.type == sf::Event::MouseButtonPressed) {
+        if (event.mouseButton.button == sf::Mouse::Left) {
+            int index = itemIndexAt(event.mouseButton.y);
+            if (index >= 0) {
+                m_selected = static_cast<MenuItem>(index);
+                activateSelected();
+            }
+        }
+        return;
+    }
+
     if (event.type != sf::Event::KeyPressed) {
         return;
     }
@@ -63,13 +111,7 @@ void MenuState::handleInput(const sf::Event& event)
 
         case sf::Keyboard::Enter:
         case sf::Keyboard::Space:
-            if (m_selected == MenuItem::Exit) {
-                m_exitRequested = true;
-            }
-            else {
-                playSfx(m_context.getSettings(), m_confirmSound);
-                m_confirmed = true;
-            }
+            activateSelected();
             break;
 
         default:
@@ -83,13 +125,13 @@ void MenuState::draw(sf::RenderWindow& window)
 
     drawText(window, font, "АРКАНОИД", 40.f, 40.f, 36);
 
-    float y = 140.f;
+    float y = ITEM_START_Y;
     for (int i = 0; i < ITEM_COUNT; ++i) {
         MenuItem item = static_cast<MenuItem>(i);
         bool selected = (item == m_selected);
         std::string text = (selected ? "> " : "  ") + std::string(itemLabel(item));
         drawText(window, font, text, 40.f, y, 24, selected ? sf::Color::Yellow : sf::Color::White);
-        y += 40.f;
+        y += ITEM_SPACING;
     }
 }
 

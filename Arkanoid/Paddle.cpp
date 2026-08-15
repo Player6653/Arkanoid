@@ -5,7 +5,7 @@ Paddle::Paddle(sf::Vector2f position, sf::Vector2f size)
 {
     m_shape.setSize(size);
     m_shape.setPosition(position);
-    m_shape.setFillColor(sf::Color::White);
+    m_shape.setFillColor(sf::Color(255, 140, 0)); // оранжевая.
 }
 
 void Paddle::update(sf::Time dt, const sf::RenderWindow& window)
@@ -40,6 +40,12 @@ void Paddle::update(sf::Time dt, const sf::RenderWindow& window)
     }
 
     clampToField();
+}
+
+void Paddle::resyncMouse(const sf::RenderWindow& window)
+{
+    m_lastMousePos = sf::Mouse::getPosition(window);
+    m_mouseInitialized = true;
 }
 
 void Paddle::clampToField()

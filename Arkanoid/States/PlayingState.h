@@ -6,7 +6,7 @@
 #include <SFML/Audio.hpp>
 #include <string>
 
-// экран игры
+// экран игры.
 class PlayingState : public IState {
 public:
     PlayingState(GameContext& context, int difficulty);
@@ -24,6 +24,9 @@ private:
     int m_level = 1;
 
     bool m_gameOver = false;
+    bool m_won = false;
+
+    static const int SCORE_PER_BRICK = 10;
 
     bool m_spaceKeyHeld = false;
     bool m_escapeKeyHeld = false;
@@ -47,4 +50,7 @@ private:
     void activatePauseSelection();
     std::string pauseItemLabel(PauseItem item) const;
     void drawPauseOverlay(sf::RenderWindow& window);
+
+    // Индекс пункта меню паузы под курсором мыши (по Y) или -1.
+    int pauseItemIndexAt(int mouseY) const;
 };

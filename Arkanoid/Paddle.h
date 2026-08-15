@@ -1,15 +1,19 @@
 ﻿#pragma once
 #include <SFML/Graphics.hpp>
+#include "GameObject.h"
 
 // Платформа игрока.
-class Paddle {
+class Paddle : public GameObject {
 public:
     Paddle(sf::Vector2f position, sf::Vector2f size);
 
     void update(sf::Time dt, const sf::RenderWindow& window);
-    void draw(sf::RenderWindow& window) const;
+    void draw(sf::RenderWindow& window) const override;
 
-    sf::FloatRect getBounds() const;
+    // Забывает прошлую позицию мыши, считая текущую точкой отсчёта.
+    void resyncMouse(const sf::RenderWindow& window);
+
+    sf::FloatRect getBounds() const override;
 
 private:
     sf::RectangleShape m_shape;

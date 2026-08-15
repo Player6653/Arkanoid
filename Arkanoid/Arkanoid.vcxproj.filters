@@ -19,10 +19,16 @@
     <ClCompile Include="Ball.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
+    <ClCompile Include="Brick.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
     <ClCompile Include="States\DifficultyState.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
     <ClCompile Include="States\GameOverState.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="States\WinState.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
     <ClCompile Include="States\HighscoresState.cpp">
@@ -60,6 +66,12 @@
     <ClInclude Include="Ball.h">
       <Filter>Sources</Filter>
     </ClInclude>
+    <ClInclude Include="Brick.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObject.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
     <ClInclude Include="States\DifficultyState.h">
       <Filter>Sources</Filter>
     </ClInclude>
@@ -67,6 +79,9 @@
       <Filter>Sources</Filter>
     </ClInclude>
     <ClInclude Include="States\GameOverState.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="States\WinState.h">
       <Filter>Sources</Filter>
     </ClInclude>
     <ClInclude Include="States\HighscoresState.h">

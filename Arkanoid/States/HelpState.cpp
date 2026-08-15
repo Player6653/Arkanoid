@@ -15,6 +15,11 @@ void HelpState::handleInput(const sf::Event& event)
         return;
     }
 
+    if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Right) {
+        m_backRequested = true;
+        return;
+    }
+
     if (isBackKey(event)) {
         m_backRequested = true;
     }
@@ -42,7 +47,7 @@ void HelpState::draw(sf::RenderWindow& window)
     y += 24.f;
     drawText(window, font, "иначе игра закончится.", 40.f, y, 18);
 
-    drawText(window, font, "Esc/Enter/Space - назад", 40.f, 560.f, 16, sf::Color(180, 180, 180));
+    drawText(window, font, "Esc/Enter/Space/ПКМ - назад", 40.f, 560.f, 16, sf::Color(180, 180, 180));
 }
 
 std::unique_ptr<IState> HelpState::nextState()

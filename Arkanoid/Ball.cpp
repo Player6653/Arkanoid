@@ -6,7 +6,7 @@ Ball::Ball(sf::Vector2f position, sf::Vector2f velocity, float radius)
     m_shape.setRadius(radius);
     m_shape.setOrigin(radius, radius); // точка позиции — центр шарика, удобнее считать отскоки.
     m_shape.setPosition(position);
-    m_shape.setFillColor(sf::Color::Yellow);
+    m_shape.setFillColor(sf::Color::White);
 }
 
 void Ball::update(sf::Time dt)
@@ -40,6 +40,28 @@ void Ball::bounceOffPaddle()
 {
     // Отражаем, только если шарик летел вниз — иначе повторный вызов.
     if (m_velocity.y > 0.f) {
+        m_velocity.y = -m_velocity.y;
+    }
+}
+
+void Ball::bounceOffBrick(const sf::FloatRect& brickBounds)
+{
+    sf::FloatRect ballBounds = getBounds();
+
+    // Насколько шарик "заехал" в блок с каждой из четырёх сторон.
+    float overlapLeft = ballBounds.left + ballBounds.width - brickBounds.left;
+    float overlapRight = brickBounds.left + brickBounds.width - ballBounds.left;
+    float overlapTop = ballBounds.top + ballBounds.height - brickBounds.top;
+    float overlapBottom = brickBounds.top + brickBounds.height - ballBounds.top;
+
+    float minOverlapX = (overlapLeft < overlapRight) ? overlapLeft : overlapRight;
+    float minOverlapY = (overlapTop < overlapBottom) ? overlapTop : overlapBottom;
+
+    // Меньшее проникновение показывает, с какой стороны произошёл удар.
+    if (minOverlapX < minOverlapY) {
+        m_velocity.x = -m_velocity.x;
+    }
+    else {
         m_velocity.y = -m_velocity.y;
     }
 }

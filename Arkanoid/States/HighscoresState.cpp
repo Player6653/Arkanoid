@@ -17,6 +17,11 @@ void HighscoresState::handleInput(const sf::Event& event)
         return;
     }
 
+    if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Right) {
+        m_backRequested = true;
+        return;
+    }
+
     if (isBackKey(event)) {
         m_backRequested = true;
     }
@@ -46,7 +51,7 @@ void HighscoresState::draw(sf::RenderWindow& window)
         }
     }
 
-    drawText(window, font, "Esc/Enter/Space — назад", 40.f, 550.f, 16, sf::Color(180, 180, 180));
+    drawText(window, font, "Esc/Enter/Space/ПКМ — назад", 40.f, 550.f, 16, sf::Color(180, 180, 180));
 }
 
 std::unique_ptr<IState> HighscoresState::nextState()

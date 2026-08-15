@@ -182,6 +182,7 @@
     <ClCompile Include="GameState.cpp" />
     <ClCompile Include="Paddle.cpp" />
     <ClCompile Include="Ball.cpp" />
+    <ClCompile Include="Brick.cpp" />
     <ClCompile Include="StateManager.cpp" />
     <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="Leaderboard.cpp" />
@@ -190,13 +191,16 @@
     <ClCompile Include="States\DifficultyState.cpp" />
     <ClCompile Include="States\HighscoresState.cpp" />
     <ClCompile Include="States\GameOverState.cpp" />
+    <ClCompile Include="States\WinState.cpp" />
     <ClCompile Include="States\PlayingState.cpp" />
     <ClCompile Include="States\HelpState.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameState.h" />
+    <ClInclude Include="GameObject.h" />
     <ClInclude Include="Paddle.h" />
     <ClInclude Include="Ball.h" />
+    <ClInclude Include="Brick.h" />
     <ClInclude Include="IState.h" />
     <ClInclude Include="Settings.h" />
     <ClInclude Include="GameContext.h" />
@@ -211,6 +215,7 @@
     <ClInclude Include="States\DifficultyState.h" />
     <ClInclude Include="States\HighscoresState.h" />
     <ClInclude Include="States\GameOverState.h" />
+    <ClInclude Include="States\WinState.h" />
     <ClInclude Include="States\PlayingState.h" />
     <ClInclude Include="States\HelpState.h" />
   </ItemGroup>

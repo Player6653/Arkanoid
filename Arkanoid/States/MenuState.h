@@ -28,4 +28,10 @@ private:
 
     void moveSelection(int direction);
     static const char* itemLabel(MenuItem item);
+
+    // Активирует то, что сейчас выбрано.
+    void activateSelected();
+
+    // Индекс пункта под курсором мыши (по Y) или -1.
+    int itemIndexAt(int mouseY) const;
 };

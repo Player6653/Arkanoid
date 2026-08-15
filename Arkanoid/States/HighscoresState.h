@@ -1,4 +1,4 @@
-﻿// экран таблицы рекордов
+﻿// экран таблицы рекордов.
 #pragma once
 #include "../IState.h"
 #include "../GameContext.h"

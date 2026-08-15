@@ -1,4 +1,4 @@
-﻿// экран смерти
+﻿// экран смерти.
 #pragma once
 #include "../IState.h"
 #include "../GameContext.h"
@@ -17,7 +17,7 @@ private:
     GameContext& m_context;
     int m_finalScore;
     std::string m_enteredName;
-    int m_enteredNameLength = 0; // в символах
+    int m_enteredNameLength = 0; // в символах.
     bool m_confirmed = false;
     sf::Sound m_gameOverSound;
 };
