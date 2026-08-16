@@ -6,6 +6,7 @@
 #include "../UiText.h"
 #include "../Audio.h"
 #include "../Settings.h"
+#include "../BrickColors.h"
 #include <cmath>
 #include <string>
 
@@ -237,8 +238,37 @@ void PlayingState::draw(sf::RenderWindow& window)
     drawText(window, font, "Сложность", panelX, 130.f, 18, sf::Color(180, 180, 180));
     drawText(window, font, difficultyName(m_level), panelX, 152.f, 22);
 
+    drawBrickLegend(window);
+
     if (m_paused) {
         drawPauseOverlay(window);
+    }
+}
+
+void PlayingState::drawBrickLegend(sf::RenderWindow& window)
+{
+    const sf::Font& font = m_context.getResources().getFont();
+    float panelX = COLS * TILE_SIZE + 20.f;
+    float y = 200.f;
+
+    drawText(window, font, "Блоки", panelX, y, 18, sf::Color(180, 180, 180));
+    y += 26.f;
+
+    struct LegendEntry { sf::Color color; const char* label; };
+    const LegendEntry entries[] = {
+        { BrickColors::DurableFresh, "Крепкий" },
+        { BrickColors::Glass, "Стекло" },
+        { BrickColors::Indestructible, "Неразрушимый" },
+    };
+
+    for (const LegendEntry& entry : entries) {
+        sf::RectangleShape swatch(sf::Vector2f(16.f, 16.f));
+        swatch.setPosition(panelX, y);
+        swatch.setFillColor(entry.color);
+        window.draw(swatch);
+
+        drawText(window, font, entry.label, panelX + 24.f, y - 3.f, 14);
+        y += 28.f;
     }
 }
 

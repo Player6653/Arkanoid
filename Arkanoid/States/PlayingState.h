@@ -51,6 +51,9 @@ private:
     std::string pauseItemLabel(PauseItem item) const;
     void drawPauseOverlay(sf::RenderWindow& window);
 
+    // какой цвет что значит.
+    void drawBrickLegend(sf::RenderWindow& window);
+
     // Индекс пункта меню паузы под курсором мыши (по Y) или -1.
     int pauseItemIndexAt(int mouseY) const;
 };

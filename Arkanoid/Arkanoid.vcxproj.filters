@@ -22,6 +22,15 @@
     <ClCompile Include="Brick.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
+    <ClCompile Include="DurableBrick.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="GlassBrick.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="IndestructibleBrick.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
     <ClCompile Include="States\DifficultyState.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
@@ -67,6 +76,18 @@
       <Filter>Sources</Filter>
     </ClInclude>
     <ClInclude Include="Brick.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="BrickColors.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="DurableBrick.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="GlassBrick.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="IndestructibleBrick.h">
       <Filter>Sources</Filter>
     </ClInclude>
     <ClInclude Include="GameObject.h">

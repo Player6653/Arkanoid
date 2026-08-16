@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include <SFML/Graphics.hpp>
 #include <vector>
+#include <memory>
 #include "Brick.h"
 
 const short ROWS = 20;
@@ -40,7 +41,8 @@ private:
     Paddle* m_paddle;
     Ball* m_ball;
     int m_brickRows;
-    std::vector<Brick> m_bricks;
+    // Указатели на базовый класс 
+    std::vector<std::unique_ptr<Brick>> m_bricks;
     bool m_brickDestroyedThisUpdate = false;
     bool m_paddleMouseResyncPending = false;
 

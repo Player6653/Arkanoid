@@ -18,3 +18,34 @@ sf::FloatRect Brick::getBounds() const
 {
     return m_shape.getGlobalBounds();
 }
+
+void Brick::onHit()
+{
+    // Базовый блок разбивается с одного удара.
+    destroy();
+}
+
+bool Brick::isDestroyed() const
+{
+    return m_destroyed;
+}
+
+bool Brick::shouldBounceBall() const
+{
+    return true;
+}
+
+bool Brick::countsTowardWin() const
+{
+    return true;
+}
+
+void Brick::destroy()
+{
+    m_destroyed = true;
+}
+
+void Brick::setColor(sf::Color color)
+{
+    m_shape.setFillColor(color);
+}

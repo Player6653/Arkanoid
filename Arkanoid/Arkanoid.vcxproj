@@ -183,6 +183,9 @@
     <ClCompile Include="Paddle.cpp" />
     <ClCompile Include="Ball.cpp" />
     <ClCompile Include="Brick.cpp" />
+    <ClCompile Include="DurableBrick.cpp" />
+    <ClCompile Include="GlassBrick.cpp" />
+    <ClCompile Include="IndestructibleBrick.cpp" />
     <ClCompile Include="StateManager.cpp" />
     <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="Leaderboard.cpp" />
@@ -201,6 +204,10 @@
     <ClInclude Include="Paddle.h" />
     <ClInclude Include="Ball.h" />
     <ClInclude Include="Brick.h" />
+    <ClInclude Include="BrickColors.h" />
+    <ClInclude Include="DurableBrick.h" />
+    <ClInclude Include="GlassBrick.h" />
+    <ClInclude Include="IndestructibleBrick.h" />
     <ClInclude Include="IState.h" />
     <ClInclude Include="Settings.h" />
     <ClInclude Include="GameContext.h" />

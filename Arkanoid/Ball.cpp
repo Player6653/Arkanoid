@@ -48,7 +48,7 @@ void Ball::bounceOffBrick(const sf::FloatRect& brickBounds)
 {
     sf::FloatRect ballBounds = getBounds();
 
-    // Насколько шарик "заехал" в блок с каждой из четырёх сторон.
+    // Насколько шарик заехал в блок с каждой из четырёх сторон.
     float overlapLeft = ballBounds.left + ballBounds.width - brickBounds.left;
     float overlapRight = brickBounds.left + brickBounds.width - ballBounds.left;
     float overlapTop = ballBounds.top + ballBounds.height - brickBounds.top;
@@ -57,13 +57,19 @@ void Ball::bounceOffBrick(const sf::FloatRect& brickBounds)
     float minOverlapX = (overlapLeft < overlapRight) ? overlapLeft : overlapRight;
     float minOverlapY = (overlapTop < overlapBottom) ? overlapTop : overlapBottom;
 
+    sf::Vector2f pos = m_shape.getPosition();
+
     // Меньшее проникновение показывает, с какой стороны произошёл удар.
     if (minOverlapX < minOverlapY) {
         m_velocity.x = -m_velocity.x;
+        pos.x += (overlapLeft < overlapRight) ? -overlapLeft : overlapRight;
     }
     else {
         m_velocity.y = -m_velocity.y;
+        pos.y += (overlapTop < overlapBottom) ? -overlapTop : overlapBottom;
     }
+
+    m_shape.setPosition(pos);
 }
 
 bool Ball::isBelow(float fieldHeight) const

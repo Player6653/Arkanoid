@@ -1,6 +1,11 @@
 ﻿#include "GameState.h"
 #include "Paddle.h"
 #include "Ball.h"
+#include "DurableBrick.h"
+#include "GlassBrick.h"
+#include "IndestructibleBrick.h"
+#include "BrickColors.h"
+#include <random>
 
 namespace {
     const int BRICK_COLS = 12; // число рядов теперь настраивается игроком, столбцов всегда 12.
@@ -8,15 +13,10 @@ namespace {
     const float BRICK_TOP_MARGIN = 40.f;
     const float BRICK_HEIGHT = 14.f;
 
-    sf::Color brickColorForRow(int row)
-    {
-        switch (row % 4) {
-            case 0: return sf::Color(220, 60, 60);   // красный
-            case 1: return sf::Color(230, 160, 40);  // оранжевый
-            case 2: return sf::Color(80, 180, 90);   // зелёный
-            default: return sf::Color(70, 130, 220); // синий
-        }
-    }
+    // Доля клеток под каждый спец-тип (суммарно должны 1.0).
+    const float INDESTRUCTIBLE_CHANCE = 0.05f;
+    const float GLASS_CHANCE = 0.08f;
+    const float DURABLE_CHANCE = 0.15f;
 }
 
 GameState::GameState(int difficulty, int brickRows)
@@ -58,11 +58,31 @@ void GameState::spawnBricks()
     const float fieldWidth = static_cast<float>(COLS * TILE_SIZE);
     const float brickWidth = (fieldWidth - BRICK_GAP * (BRICK_COLS + 1)) / BRICK_COLS;
 
+    // Свой генератор на каждый вызов spawnBricks(), поэтому раскладка спец-блоков отличается
+    std::random_device seed;
+    std::mt19937 rng(seed());
+    std::uniform_real_distribution<float> roll(0.f, 1.f);
+
     for (int row = 0; row < m_brickRows; ++row) {
         for (int col = 0; col < BRICK_COLS; ++col) {
             float x = BRICK_GAP + col * (brickWidth + BRICK_GAP);
             float y = BRICK_TOP_MARGIN + row * (BRICK_HEIGHT + BRICK_GAP);
-            m_bricks.push_back(Brick(sf::Vector2f(x, y), sf::Vector2f(brickWidth, BRICK_HEIGHT), brickColorForRow(row)));
+            sf::Vector2f position(x, y);
+            sf::Vector2f size(brickWidth, BRICK_HEIGHT);
+
+            float r = roll(rng);
+            if (r < INDESTRUCTIBLE_CHANCE) {
+                m_bricks.push_back(std::make_unique<IndestructibleBrick>(position, size));
+            }
+            else if (r < INDESTRUCTIBLE_CHANCE + GLASS_CHANCE) {
+                m_bricks.push_back(std::make_unique<GlassBrick>(position, size));
+            }
+            else if (r < INDESTRUCTIBLE_CHANCE + GLASS_CHANCE + DURABLE_CHANCE) {
+                m_bricks.push_back(std::make_unique<DurableBrick>(position, size, 3));
+            }
+            else {
+                m_bricks.push_back(std::make_unique<Brick>(position, size, BrickColors::Normal));
+            }
         }
     }
 }
@@ -72,11 +92,22 @@ void GameState::handleBrickCollisions()
     sf::FloatRect ballBounds = m_ball->getBounds();
 
     for (std::size_t i = 0; i < m_bricks.size(); ++i) {
-        if (ballBounds.intersects(m_bricks[i].getBounds())) {
-            m_ball->bounceOffBrick(m_bricks[i].getBounds());
-            m_bricks.erase(m_bricks.begin() + i);
-            m_brickDestroyedThisUpdate = true;
-            break; // за один кадр разбиваем не больше одного блока.
+        Brick* brick = m_bricks[i].get();
+
+        if (ballBounds.intersects(brick->getBounds())) {
+            // Узнаём про отскок до onHit().
+            bool shouldBounce = brick->shouldBounceBall();
+            brick->onHit();
+
+            if (shouldBounce) {
+                m_ball->bounceOffBrick(brick->getBounds());
+            }
+
+            if (brick->isDestroyed()) {
+                m_bricks.erase(m_bricks.begin() + i);
+                m_brickDestroyedThisUpdate = true;
+            }
+            break; // за один кадр обрабатываем не больше одного блока.
         }
     }
 }
@@ -108,9 +139,9 @@ void GameState::update(sf::Time dt, const sf::RenderWindow& window)
 
 void GameState::draw(sf::RenderWindow& window) const
 {
-    // Через ссылку на базовый GameObject.
-    for (const GameObject& brick : m_bricks) {
-        brick.draw(window);
+    // Вызов через указатель на базовый Brick.
+    for (const std::unique_ptr<Brick>& brick : m_bricks) {
+        brick->draw(window);
     }
     m_paddle->draw(window);
     m_ball->draw(window);
@@ -128,5 +159,10 @@ bool GameState::wasBrickDestroyed() const
 
 bool GameState::areAllBricksDestroyed() const
 {
-    return m_bricks.empty();
+    for (const std::unique_ptr<Brick>& brick : m_bricks) {
+        if (brick->countsTowardWin()) {
+            return false;
+        }
+    }
+    return true;
 }
