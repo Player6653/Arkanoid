@@ -2,6 +2,8 @@
 #include "GameState.h"
 
 Paddle::Paddle(sf::Vector2f position, sf::Vector2f size)
+    : m_baseSize(size)
+    , m_state(std::make_unique<IPaddleState>())
 {
     m_shape.setSize(size);
     m_shape.setPosition(position);
@@ -71,4 +73,39 @@ void Paddle::draw(sf::RenderWindow& window) const
 sf::FloatRect Paddle::getBounds() const
 {
     return m_shape.getGlobalBounds();
+}
+
+float Paddle::getX() const
+{
+    return m_shape.getPosition().x;
+}
+
+void Paddle::setX(float x)
+{
+    m_shape.setPosition(x, m_shape.getPosition().y);
+    clampToField();
+}
+
+float Paddle::getNormalizedX() const
+{
+    float centerX = m_shape.getPosition().x + m_shape.getSize().x / 2.f;
+    return centerX - m_baseSize.x / 2.f;
+}
+
+void Paddle::setState(std::unique_ptr<IPaddleState> state)
+{
+    m_state = std::move(state);
+
+    float newWidth = m_baseSize.x * m_state->widthMultiplier();
+    float oldWidth = m_shape.getSize().x;
+
+    // Меняем ширину, оставляя центр платформы на месте.
+    sf::Vector2f pos = m_shape.getPosition();
+    pos.x -= (newWidth - oldWidth) / 2.f;
+
+    m_shape.setSize(sf::Vector2f(newWidth, m_baseSize.y));
+    m_shape.setPosition(pos);
+    m_speed = m_baseSpeed * m_state->speedMultiplier();
+
+    clampToField();
 }

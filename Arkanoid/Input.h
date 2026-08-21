@@ -9,7 +9,7 @@ inline bool isBackKey(const sf::Event& event)
             || event.key.code == sf::Keyboard::Space);
 }
 
-// Не даёт экрану среагироватб, которые ещё физически зажаты в момент.
+// Не даёт экрану среагировать, которые ещё физически зажаты в момент.
 class StaleKeyGuard {
 public:
     StaleKeyGuard()

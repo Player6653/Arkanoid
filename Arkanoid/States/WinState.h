@@ -4,6 +4,7 @@
 #include "../GameContext.h"
 #include "../Input.h"
 #include <SFML/Audio.hpp>
+#include <string>
 
 class WinState : public IState {
 public:
@@ -22,8 +23,19 @@ private:
     Choice m_selected = Choice::Yes;
     bool m_confirmed = false;
 
+    // Сначала игрок вводит имя для таблицы рекордов, и только потом — Да/Нет "сыграть ещё раз".
+    std::string m_enteredName;
+    int m_enteredNameLength = 0; // в символах.
+    bool m_nameConfirmed = false;
+
     sf::Sound m_moveSound;
     sf::Sound m_confirmSound;
+    sf::Sound m_winSound;
+
+    void handleNameInput(const sf::Event& event);
+    void handleReplayInput(const sf::Event& event);
+    void drawNameEntry(sf::RenderWindow& window);
+    void drawReplayPrompt(sf::RenderWindow& window);
 
     void toggleSelection();
     void confirm(Choice choice);

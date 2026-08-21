@@ -11,6 +11,7 @@ public:
     sf::SoundBuffer& getRotateBuffer();
     sf::SoundBuffer& getLineClearBuffer();
     sf::SoundBuffer& getGameOverBuffer();
+    sf::SoundBuffer& getWinBuffer();
     sf::SoundBuffer& getSwapBuffer();
     sf::Music& getMenuMusic();
     sf::Music& getGameplayMusic();
@@ -21,6 +22,7 @@ private:
     sf::SoundBuffer m_rotateBuffer;
     sf::SoundBuffer m_lineClearBuffer;
     sf::SoundBuffer m_gameOverBuffer;
+    sf::SoundBuffer m_winBuffer;
     sf::SoundBuffer m_swapBuffer;
 
     sf::Music m_menuMusic;

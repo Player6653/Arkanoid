@@ -4,34 +4,9 @@
 #include "../ResourceManager.h"
 #include "../UiText.h"
 #include "../Audio.h"
-#include <SFML/System/Utf.hpp>
+#include "../NameEntry.h"
+#include "../SavePaths.h"
 #include <string>
-#include <iterator>
-
-namespace {
-    const sf::Uint32 BACKSPACE = 8;
-    const int MAX_NAME_LENGTH = 12; // в символах.
-
-    // Можно по русски писать.
-    bool isAllowedNameChar(sf::Uint32 unicode)
-    {
-        bool isAsciiPrintable = unicode > 32 && unicode < 127;
-        bool isCyrillic = unicode >= 0x0400 && unicode <= 0x04FF;
-        return isAsciiPrintable || isCyrillic;
-    }
-
-    void popLastUtf8Char(std::string& s)
-    {
-        if (s.empty()) {
-            return;
-        }
-        std::size_t i = s.size() - 1;
-        while (i > 0 && (static_cast<unsigned char>(s[i]) & 0xC0) == 0x80) {
-            --i;
-        }
-        s.erase(i);
-    }
-}
 
 GameOverState::GameOverState(GameContext& context, int finalScore)
     : m_context(context)
@@ -41,23 +16,15 @@ GameOverState::GameOverState(GameContext& context, int finalScore)
 
     m_gameOverSound.setBuffer(m_context.getResources().getGameOverBuffer());
     playSfx(m_context.getSettings(), m_gameOverSound);
+
+    // Забег закончился поражением — старое сохранение продолжать уже нельзя.
+    deleteSaveFile();
 }
 
 void GameOverState::handleInput(const sf::Event& event)
 {
     if (event.type == sf::Event::TextEntered) {
-        if (event.text.unicode == BACKSPACE) {
-            if (!m_enteredName.empty()) {
-                popLastUtf8Char(m_enteredName);
-                --m_enteredNameLength;
-            }
-        }
-        else if (isAllowedNameChar(event.text.unicode)) {
-            if (m_enteredNameLength < MAX_NAME_LENGTH) {
-                sf::Utf8::encode(event.text.unicode, std::back_inserter(m_enteredName));
-                ++m_enteredNameLength;
-            }
-        }
+        NameEntry::handleTextEntered(event.text.unicode, m_enteredName, m_enteredNameLength);
     }
     else if (event.type == sf::Event::KeyPressed) {
         if (event.key.code == sf::Keyboard::Enter && !m_enteredName.empty() && !m_confirmed) {

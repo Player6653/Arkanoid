@@ -1,4 +1,4 @@
-﻿// таблица рекордов 
+﻿// таблица рекордов.
 #include "Leaderboard.h"
 #include <fstream>
 #include <algorithm>

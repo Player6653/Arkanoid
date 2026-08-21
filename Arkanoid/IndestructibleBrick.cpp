@@ -15,3 +15,13 @@ bool IndestructibleBrick::countsTowardWin() const
 {
     return false;
 }
+
+void IndestructibleBrick::forceDestroy()
+{
+    // Ничего не делаем.
+}
+
+BrickKind IndestructibleBrick::getKind() const
+{
+    return BrickKind::Indestructible;
+}

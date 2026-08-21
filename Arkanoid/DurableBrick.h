@@ -8,6 +8,10 @@ public:
 
     void onHit() override;
 
+    BrickKind getKind() const override;
+    int getScoreValue() const override;
+    int getHitsRemaining() const override;
+
 private:
     int m_hitsRemaining;
 

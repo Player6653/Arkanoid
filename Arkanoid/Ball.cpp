@@ -2,9 +2,10 @@
 
 Ball::Ball(sf::Vector2f position, sf::Vector2f velocity, float radius)
     : m_velocity(velocity)
+    , m_behavior(std::make_unique<IBallBehavior>())
 {
     m_shape.setRadius(radius);
-    m_shape.setOrigin(radius, radius); // точка позиции — центр шарика, удобнее считать отскоки.
+    m_shape.setOrigin(radius, radius); // точка позиции - центр шарика, удобнее считать отскоки.
     m_shape.setPosition(position);
     m_shape.setFillColor(sf::Color::White);
 }
@@ -74,7 +75,7 @@ void Ball::bounceOffBrick(const sf::FloatRect& brickBounds)
 
 bool Ball::isBelow(float fieldHeight) const
 {
-    return m_shape.getPosition().y - m_shape.getRadius() > fieldHeight;
+    return isPositionBelowField(m_shape.getPosition().y, m_shape.getRadius(), fieldHeight);
 }
 
 sf::FloatRect Ball::getBounds() const
@@ -85,4 +86,74 @@ sf::FloatRect Ball::getBounds() const
 void Ball::draw(sf::RenderWindow& window) const
 {
     window.draw(m_shape);
+}
+
+sf::Vector2f Ball::getPosition() const
+{
+    return m_shape.getPosition();
+}
+
+sf::Vector2f Ball::getVelocity() const
+{
+    return m_velocity;
+}
+
+void Ball::setPosition(sf::Vector2f position)
+{
+    m_shape.setPosition(position);
+}
+
+void Ball::setVelocity(sf::Vector2f velocity)
+{
+    m_velocity = velocity;
+    m_speedMultiplier = 1.f; // это и есть новая нормальная скорость.
+}
+
+void Ball::scaleVelocity(float factor)
+{
+    m_velocity *= factor;
+    m_speedMultiplier *= factor;
+}
+
+sf::Vector2f Ball::getNormalizedVelocity() const
+{
+    return m_velocity / m_speedMultiplier;
+}
+
+const IBallBehavior& Ball::getBehavior() const
+{
+    return *m_behavior;
+}
+
+void Ball::setBehavior(std::unique_ptr<IBallBehavior> behavior)
+{
+    m_behavior = std::move(behavior);
+    updateColor();
+}
+
+void Ball::setTint(sf::Color color)
+{
+    m_tint = color;
+    m_hasTint = true;
+    updateColor();
+}
+
+void Ball::clearTint()
+{
+    m_hasTint = false;
+    updateColor();
+}
+
+void Ball::updateColor()
+{
+    sf::Color behaviorColor = m_behavior->getColor();
+    if (behaviorColor != sf::Color::White) {
+        m_shape.setFillColor(behaviorColor); // особая стратегия важнее подсветки.
+    }
+    else if (m_hasTint) {
+        m_shape.setFillColor(m_tint);
+    }
+    else {
+        m_shape.setFillColor(sf::Color::White);
+    }
 }

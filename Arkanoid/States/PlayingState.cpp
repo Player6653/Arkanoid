@@ -2,12 +2,14 @@
 #include "GameOverState.h"
 #include "WinState.h"
 #include "MenuState.h"
+#include "SettingsState.h"
 #include "../ResourceManager.h"
 #include "../UiText.h"
 #include "../Audio.h"
 #include "../Settings.h"
 #include "../BrickColors.h"
-#include <cmath>
+#include "../PowerUpColors.h"
+#include "../SavePaths.h"
 #include <string>
 
 namespace {
@@ -15,18 +17,64 @@ namespace {
     const float PAUSE_ITEM_START_Y = 270.f;
     const float PAUSE_ITEM_SPACING = 40.f;
     const float PAUSE_ITEM_CLICK_HEIGHT = 32.f;
+
+    // Общий вид для легенды блоков и легенды бонусов.
+    struct LegendEntry { sf::Color color; const char* label; };
+
+    void drawLegend(sf::RenderWindow& window, const sf::Font& font, float panelX, const char* title,
+        float startY, const LegendEntry* entries, std::size_t count)
+    {
+        float y = startY;
+        drawText(window, font, title, panelX, y, 16, sf::Color(180, 180, 180));
+        y += 22.f;
+
+        for (std::size_t i = 0; i < count; ++i) {
+            sf::RectangleShape swatch(sf::Vector2f(14.f, 14.f));
+            swatch.setPosition(panelX, y);
+            swatch.setFillColor(entries[i].color);
+            window.draw(swatch);
+
+            drawText(window, font, entries[i].label, panelX + 22.f, y - 3.f, 13);
+            y += 22.f;
+        }
+    }
 }
 
-PlayingState::PlayingState(GameContext& context, int difficulty)
+PlayingState::PlayingState(GameContext& context, int difficulty, int level, int carriedScore)
     : m_context(context)
-    , m_gameState(difficulty, context.getSettings().getBrickRows())
+    , m_facade(difficulty, level, brickRowsForLevel(context.getSettings().getBrickRows(), level),
+        context.getSettings().getLevelCount(), carriedScore)
 {
-    m_level = difficulty;
-
     m_pauseMoveSound.setBuffer(m_context.getResources().getRotateBuffer());
     m_pauseToggleSound.setBuffer(m_context.getResources().getSwapBuffer());
 
     switchMusic(m_context.getSettings(), m_context.getResources().getMenuMusic(), m_context.getResources().getGameplayMusic());
+}
+
+std::unique_ptr<PlayingState> PlayingState::continueFromSave(GameContext& context, const std::string& savePath)
+{
+    auto state = std::make_unique<PlayingState>(context, context.getSettings().getDifficulty());
+    // Если файла нет/он повреждён — просто остаётся свежая игра с 1 уровня.
+    state->m_facade.loadFromFile(savePath);
+    return state;
+}
+
+std::unique_ptr<PlayingState> PlayingState::fromMemento(GameContext& context, const GameMemento& memento, bool paused,
+    const std::vector<BonusManager::ActiveBonusSnapshot>& activeBonuses)
+{
+    auto state = std::make_unique<PlayingState>(context, memento.getDifficulty());
+    state->m_facade.restore(memento);
+    state->m_facade.restoreActiveBonuses(activeBonuses);
+    if (paused) {
+        state->setPaused(true);
+    }
+    return state;
+}
+
+int PlayingState::brickRowsForLevel(int baseRows, int level)
+{
+    int rows = baseRows + (level - 1);
+    return (rows > 10) ? 10 : rows;
 }
 
 void PlayingState::setPaused(bool paused)
@@ -38,7 +86,8 @@ void PlayingState::setPaused(bool paused)
     }
     else {
         // Пока была пауза, Paddle::update() не вызывался и не видел, как двигалась мышька.
-        m_gameState.requestPaddleMouseResync();
+        m_facade.requestPaddleMouseResync();
+        m_pauseMessage.clear();
 
         if (m_context.getSettings().isMusicOn()) {
             playIfNotPlaying(m_context.getResources().getGameplayMusic());
@@ -62,20 +111,13 @@ void PlayingState::activatePauseSelection()
             setPaused(false);
             break;
 
-        case PauseItem::ToggleSound:
-            m_context.getSettings().toggleSound();
+        case PauseItem::SaveGame:
+            m_pauseMessage = m_facade.saveToFile(savePath()) ? "Игра сохранена" : "Не удалось сохранить";
             playSfx(m_context.getSettings(), m_pauseToggleSound);
             break;
 
-        case PauseItem::ToggleMusic:
-            m_context.getSettings().toggleMusic();
-            if (m_context.getSettings().isMusicOn()) {
-                playIfNotPlaying(m_context.getResources().getGameplayMusic());
-            }
-            else {
-                m_context.getResources().getGameplayMusic().pause();
-            }
-            playSfx(m_context.getSettings(), m_pauseToggleSound);
+        case PauseItem::OpenSettings:
+            m_openSettingsRequested = true;
             break;
 
         case PauseItem::QuitToMenu:
@@ -89,10 +131,10 @@ std::string PlayingState::pauseItemLabel(PauseItem item) const
     switch (item) {
         case PauseItem::Resume:
             return "Продолжить";
-        case PauseItem::ToggleSound:
-            return std::string("Звук: ") + (m_context.getSettings().isSoundOn() ? "ВКЛ" : "ВЫКЛ");
-        case PauseItem::ToggleMusic:
-            return std::string("Музыка: ") + (m_context.getSettings().isMusicOn() ? "ВКЛ" : "ВЫКЛ");
+        case PauseItem::SaveGame:
+            return "Сохранить игру";
+        case PauseItem::OpenSettings:
+            return "Настройки";
         case PauseItem::QuitToMenu:
             return "Выйти в меню";
     }
@@ -193,10 +235,15 @@ void PlayingState::handleInput(const sf::Event& event)
         return;
     }
 
+    if (!m_paused && event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Right) {
+        setPaused(true);
+        return;
+    }
+
     if (m_paused) {
         handlePausedInput(event);
     }
-    // Платформа опрашивает ввод в update(), поэтому во время игры (не на паузе) обрабатывать тут больше нечего.
+    // Платформа опрашивает ввод в update().
 }
 
 void PlayingState::update(sf::Time dt, const sf::RenderWindow& window)
@@ -205,24 +252,19 @@ void PlayingState::update(sf::Time dt, const sf::RenderWindow& window)
         return;
     }
 
-    m_gameState.update(dt, window);
+    m_facade.update(dt, window);
 
-    if (m_gameState.wasBrickDestroyed()) {
-        // Лёгкая x1, средняя x1.25, сложная x1.5 — округляем, а не отбрасываем.
-        m_score += static_cast<int>(std::round(SCORE_PER_BRICK * difficultyScoreMultiplier(m_level)));
-    }
-
-    if (m_gameState.isBallLost()) {
+    if (m_facade.isBallLost()) {
         m_gameOver = true;
     }
-    else if (m_gameState.areAllBricksDestroyed()) {
-        m_won = true;
+    else if (m_facade.isLevelComplete()) {
+        m_levelComplete = true;
     }
 }
 
 void PlayingState::draw(sf::RenderWindow& window)
 {
-    m_gameState.draw(window);
+    m_facade.draw(window);
 
     sf::RectangleShape separator(sf::Vector2f(2.f, static_cast<float>(ROWS * TILE_SIZE)));
     separator.setPosition(static_cast<float>(COLS * TILE_SIZE), 0.f);
@@ -232,13 +274,15 @@ void PlayingState::draw(sf::RenderWindow& window)
     const sf::Font& font = m_context.getResources().getFont();
     float panelX = COLS * TILE_SIZE + 20.f;
 
-    drawText(window, font, "Счёт", panelX, 40.f, 18, sf::Color(180, 180, 180));
-    drawText(window, font, std::to_string(m_score), panelX, 62.f, 28);
+    drawText(window, font, "Счёт", panelX, 20.f, 16, sf::Color(180, 180, 180));
+    drawText(window, font, std::to_string(m_facade.getScore()), panelX, 40.f, 24);
 
-    drawText(window, font, "Сложность", panelX, 130.f, 18, sf::Color(180, 180, 180));
-    drawText(window, font, difficultyName(m_level), panelX, 152.f, 22);
+    drawText(window, font, "Уровень " + std::to_string(m_facade.getLevel()) + " / " + std::to_string(m_facade.getLevelCount()),
+        panelX, 88.f, 16, sf::Color(180, 180, 180));
+    drawText(window, font, "Сложность: " + std::string(difficultyName(m_facade.getDifficulty())), panelX, 108.f, 16);
 
     drawBrickLegend(window);
+    drawBonusLegend(window);
 
     if (m_paused) {
         drawPauseOverlay(window);
@@ -249,27 +293,27 @@ void PlayingState::drawBrickLegend(sf::RenderWindow& window)
 {
     const sf::Font& font = m_context.getResources().getFont();
     float panelX = COLS * TILE_SIZE + 20.f;
-    float y = 200.f;
 
-    drawText(window, font, "Блоки", panelX, y, 18, sf::Color(180, 180, 180));
-    y += 26.f;
-
-    struct LegendEntry { sf::Color color; const char* label; };
     const LegendEntry entries[] = {
         { BrickColors::DurableFresh, "Крепкий" },
         { BrickColors::Glass, "Стекло" },
         { BrickColors::Indestructible, "Неразрушимый" },
     };
+    drawLegend(window, font, panelX, "Блоки", 150.f, entries, sizeof(entries) / sizeof(entries[0]));
+}
 
-    for (const LegendEntry& entry : entries) {
-        sf::RectangleShape swatch(sf::Vector2f(16.f, 16.f));
-        swatch.setPosition(panelX, y);
-        swatch.setFillColor(entry.color);
-        window.draw(swatch);
+void PlayingState::drawBonusLegend(sf::RenderWindow& window)
+{
+    const sf::Font& font = m_context.getResources().getFont();
+    float panelX = COLS * TILE_SIZE + 20.f;
 
-        drawText(window, font, entry.label, panelX + 24.f, y - 3.f, 14);
-        y += 28.f;
-    }
+    const LegendEntry entries[] = {
+        { PowerUpColors::Fireball, "Огненный мяч" },
+        { PowerUpColors::FragileBlocks, "Хрупкие блоки" },
+        { PowerUpColors::WidePaddle, "Широкая платформа" },
+        { PowerUpColors::RemoveIndestructible, "Динамит" },
+    };
+    drawLegend(window, font, panelX, "Бонусы", 260.f, entries, sizeof(entries) / sizeof(entries[0]));
 }
 
 void PlayingState::drawPauseOverlay(sf::RenderWindow& window)
@@ -293,20 +337,41 @@ void PlayingState::drawPauseOverlay(sf::RenderWindow& window)
         drawText(window, font, text, x, y, 24, selected ? sf::Color::Yellow : sf::Color::White);
     }
 
-    drawText(window, font, "ПКМ — продолжить игру",
-        x, PAUSE_ITEM_START_Y + PAUSE_ITEM_COUNT * PAUSE_ITEM_SPACING + 20.f, 16, sf::Color(180, 180, 180));
+    float messageY = PAUSE_ITEM_START_Y + PAUSE_ITEM_COUNT * PAUSE_ITEM_SPACING + 20.f;
+    if (!m_pauseMessage.empty()) {
+        drawText(window, font, m_pauseMessage, x, messageY, 16, sf::Color(120, 220, 120));
+        messageY += 24.f;
+    }
+
+    drawText(window, font, "ПКМ — продолжить игру", x, messageY, 16, sf::Color(180, 180, 180));
 }
 
 std::unique_ptr<IState> PlayingState::nextState()
 {
-    if (m_won) {
-        return std::make_unique<WinState>(m_context, m_score);
+    if (m_levelComplete) {
+        if (m_facade.getLevel() < m_facade.getLevelCount()) {
+            return std::make_unique<PlayingState>(m_context, m_facade.getDifficulty(), m_facade.getLevel() + 1, m_facade.getScore());
+        }
+        return std::make_unique<WinState>(m_context, m_facade.getScore());
     }
     if (m_gameOver) {
-        return std::make_unique<GameOverState>(m_context, m_score);
+        return std::make_unique<GameOverState>(m_context, m_facade.getScore());
     }
     if (m_quitToMenuRequested) {
         return std::make_unique<MenuState>(m_context);
+    }
+    if (m_openSettingsRequested) {
+        m_openSettingsRequested = false;
+
+        // Не захватываем this/m_context в лямбде "назад" — к моменту, когда её вызовут, этот PlayingState уже будет уничтожен StateManager.
+        GameContext& context = m_context;
+        GameMemento memento = m_facade.createMemento();
+        std::vector<BonusManager::ActiveBonusSnapshot> activeBonuses = m_facade.snapshotActiveBonuses();
+
+        return std::make_unique<SettingsState>(m_context, m_context.getResources().getGameplayMusic(),
+            [&context, memento, activeBonuses]() {
+                return PlayingState::fromMemento(context, memento, true, activeBonuses);
+            });
     }
     return nullptr;
 }

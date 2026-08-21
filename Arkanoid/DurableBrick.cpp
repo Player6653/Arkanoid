@@ -19,6 +19,21 @@ void DurableBrick::onHit()
     }
 }
 
+BrickKind DurableBrick::getKind() const
+{
+    return BrickKind::Durable;
+}
+
+int DurableBrick::getScoreValue() const
+{
+    return 25;
+}
+
+int DurableBrick::getHitsRemaining() const
+{
+    return m_hitsRemaining;
+}
+
 sf::Color DurableBrick::colorForHits(int hitsRemaining)
 {
     // 3 удара — светлая, 1 удар — тёмная.

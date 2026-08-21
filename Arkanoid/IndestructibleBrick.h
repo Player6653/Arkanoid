@@ -8,4 +8,9 @@ public:
 
     void onHit() override;
     bool countsTowardWin() const override;
+
+    // Даже бонус хрупкие блоки не должен ломать неразрушимый блок.
+    void forceDestroy() override;
+
+    BrickKind getKind() const override;
 };

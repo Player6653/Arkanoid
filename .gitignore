@@ -4,3 +4,4 @@ x64
 x86
 *.user
 Arkanoid/highscores.txt
+Arkanoid/savegame.txt

@@ -5,7 +5,7 @@
 #include "../Input.h"
 #include <SFML/Audio.hpp>
 
-// Выбор уровня сложности и количества рядов блоков.
+// Выбор уровня сложности, количества рядов блоков и числа уровней для победы.
 class DifficultyState : public IState {
 public:
     explicit DifficultyState(GameContext& context);
@@ -15,8 +15,8 @@ public:
     std::unique_ptr<IState> nextState() override;
 
 private:
-    enum class SelectedItem { Difficulty, BrickRows };
-    static const int ITEM_COUNT = 2;
+    enum class SelectedItem { Difficulty, BrickRows, LevelCount };
+    static const int ITEM_COUNT = 3;
 
     GameContext& m_context;
     StaleKeyGuard m_staleKeys;

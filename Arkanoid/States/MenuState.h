@@ -14,12 +14,19 @@ public:
     bool wantsExit() const override { return m_exitRequested; }
 
 private:
-    enum class MenuItem { StartGame, Difficulty, Highscores, Help, Settings, Exit };
-    static const int ITEM_COUNT = 6;
+    enum class MenuItem { Continue, StartGame, Difficulty, Highscores, Help, Settings, Exit };
+    static const int ITEM_COUNT = 7;
+
+    static bool saveFileExists();
 
     GameContext& m_context;
     StaleKeyGuard m_staleKeys;
-    MenuItem m_selected = MenuItem::StartGame;
+
+    // Проверяется на диске один раз при входе в меню, а не в каждом draw().
+    bool m_hasSave;
+
+    MenuItem m_selected;
+
     bool m_confirmed = false;
     bool m_exitRequested = false;
 

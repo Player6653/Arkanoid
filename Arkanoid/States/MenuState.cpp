@@ -7,6 +7,8 @@
 #include "../ResourceManager.h"
 #include "../UiText.h"
 #include "../Audio.h"
+#include "../SavePaths.h"
+#include <fstream>
 #include <string>
 
 namespace {
@@ -18,6 +20,8 @@ namespace {
 
 MenuState::MenuState(GameContext& context)
     : m_context(context)
+    , m_hasSave(saveFileExists())
+    , m_selected(m_hasSave ? MenuItem::Continue : MenuItem::StartGame)
 {
     m_moveSound.setBuffer(m_context.getResources().getRotateBuffer());
     m_confirmSound.setBuffer(m_context.getResources().getLineClearBuffer());
@@ -34,15 +38,25 @@ void MenuState::moveSelection(int direction)
     playSfx(m_context.getSettings(), m_moveSound);
 }
 
+bool MenuState::saveFileExists()
+{
+    std::ifstream file(savePath());
+    return file.is_open();
+}
+
 void MenuState::activateSelected()
 {
     if (m_selected == MenuItem::Exit) {
         m_exitRequested = true;
+        return;
     }
-    else {
-        playSfx(m_context.getSettings(), m_confirmSound);
-        m_confirmed = true;
+    if (m_selected == MenuItem::Continue && !m_hasSave) {
+        // Нет сохранения — пункт по факту неактивен.
+        return;
     }
+
+    playSfx(m_context.getSettings(), m_confirmSound);
+    m_confirmed = true;
 }
 
 int MenuState::itemIndexAt(int mouseY) const
@@ -59,6 +73,7 @@ int MenuState::itemIndexAt(int mouseY) const
 const char* MenuState::itemLabel(MenuItem item)
 {
     switch (item) {
+        case MenuItem::Continue:  return "Продолжить";
         case MenuItem::StartGame:  return "Начать игру";
         case MenuItem::Difficulty: return "Уровень сложности";
         case MenuItem::Highscores: return "Таблица рекордов";
@@ -129,8 +144,18 @@ void MenuState::draw(sf::RenderWindow& window)
     for (int i = 0; i < ITEM_COUNT; ++i) {
         MenuItem item = static_cast<MenuItem>(i);
         bool selected = (item == m_selected);
+        bool disabled = (item == MenuItem::Continue && !m_hasSave);
         std::string text = (selected ? "> " : "  ") + std::string(itemLabel(item));
-        drawText(window, font, text, 40.f, y, 24, selected ? sf::Color::Yellow : sf::Color::White);
+
+        sf::Color color = sf::Color::White;
+        if (disabled) {
+            color = sf::Color(110, 110, 110);
+        }
+        else if (selected) {
+            color = sf::Color::Yellow;
+        }
+
+        drawText(window, font, text, 40.f, y, 24, color);
         y += ITEM_SPACING;
     }
 }
@@ -142,6 +167,8 @@ std::unique_ptr<IState> MenuState::nextState()
     }
 
     switch (m_selected) {
+        case MenuItem::Continue:
+            return PlayingState::continueFromSave(m_context, savePath());
         case MenuItem::StartGame:
             return std::make_unique<PlayingState>(m_context, m_context.getSettings().getDifficulty());
         case MenuItem::Difficulty:
@@ -151,7 +178,7 @@ std::unique_ptr<IState> MenuState::nextState()
         case MenuItem::Help:
             return std::make_unique<HelpState>(m_context);
         case MenuItem::Settings:
-            return std::make_unique<SettingsState>(m_context);
+            return std::make_unique<SettingsState>(m_context, m_context.getResources().getMenuMusic());
         default:
             return nullptr;
     }

@@ -31,6 +31,39 @@
     <ClCompile Include="IndestructibleBrick.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
+    <ClCompile Include="BrickFactory.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="GameMemento.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="GameFacade.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="FireballBehavior.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="WidePaddleState.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="FireballBonusCommand.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="FragileBlocksBonusCommand.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="WidePaddleBonusCommand.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="RemoveIndestructibleBonusCommand.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="BonusManager.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="PowerUp.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
     <ClCompile Include="States\DifficultyState.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
@@ -93,6 +126,60 @@
     <ClInclude Include="GameObject.h">
       <Filter>Sources</Filter>
     </ClInclude>
+    <ClInclude Include="BrickFactory.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="IGameObserver.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="GameMemento.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="GameFacade.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="SavePaths.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="IBallBehavior.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="FireballBehavior.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="IPaddleState.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="WidePaddleState.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="BonusType.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="IBonusCommand.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="FireballBonusCommand.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="FragileBlocksBonusCommand.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="WidePaddleBonusCommand.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="RemoveIndestructibleBonusCommand.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="BonusManager.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="PowerUp.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="PowerUpColors.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
     <ClInclude Include="States\DifficultyState.h">
       <Filter>Sources</Filter>
     </ClInclude>
@@ -139,6 +226,9 @@
       <Filter>Sources</Filter>
     </ClInclude>
     <ClInclude Include="Input.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="NameEntry.h">
       <Filter>Sources</Filter>
     </ClInclude>
     <ClInclude Include="States\HelpState.h">

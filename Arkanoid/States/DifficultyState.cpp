@@ -31,21 +31,33 @@ void DifficultyState::moveSelection(int direction)
 
 void DifficultyState::changeValue(int direction)
 {
-    if (m_selectedItem == SelectedItem::Difficulty) {
-        if (direction < 0) {
-            m_context.getSettings().decreaseDifficulty();
-        }
-        else {
-            m_context.getSettings().increaseDifficulty();
-        }
-    }
-    else {
-        if (direction < 0) {
-            m_context.getSettings().decreaseBrickRows();
-        }
-        else {
-            m_context.getSettings().increaseBrickRows();
-        }
+    switch (m_selectedItem) {
+        case SelectedItem::Difficulty:
+            if (direction < 0) {
+                m_context.getSettings().decreaseDifficulty();
+            }
+            else {
+                m_context.getSettings().increaseDifficulty();
+            }
+            break;
+
+        case SelectedItem::BrickRows:
+            if (direction < 0) {
+                m_context.getSettings().decreaseBrickRows();
+            }
+            else {
+                m_context.getSettings().increaseBrickRows();
+            }
+            break;
+
+        case SelectedItem::LevelCount:
+            if (direction < 0) {
+                m_context.getSettings().decreaseLevelCount();
+            }
+            else {
+                m_context.getSettings().increaseLevelCount();
+            }
+            break;
     }
 
     // Значение зациклено и меняется всегда, так что звук играет на каждый клик.
@@ -158,11 +170,18 @@ void DifficultyState::draw(sf::RenderWindow& window)
     drawText(window, font, brickRowsLine, 40.f, ITEM_START_Y + ITEM_SPACING, 22,
         brickRowsSelected ? sf::Color::Yellow : sf::Color::White);
 
-    drawText(window, font, "Сложность влияет на скорость шарика.", 40.f, 260.f, 16, sf::Color(180, 180, 180));
-    drawText(window, font, "Больше рядов блоков — длиннее партия.", 40.f, 280.f, 16, sf::Color(180, 180, 180));
-    drawText(window, font, "Вверх/вниз — выбор пункта, влево/вправо — изменить значение", 40.f, 340.f, 16, sf::Color(180, 180, 180));
-    drawText(window, font, "Мышь: клик ЛКМ увеличивает, колесо — оба направления", 40.f, 360.f, 16, sf::Color(180, 180, 180));
-    drawText(window, font, "Esc/Enter/Space/ПКМ — назад", 40.f, 380.f, 16, sf::Color(180, 180, 180));
+    bool levelCountSelected = (m_selectedItem == SelectedItem::LevelCount);
+    std::string levelCountLine = std::string(levelCountSelected ? "> " : "  ")
+        + "Уровней для победы: " + std::to_string(m_context.getSettings().getLevelCount()) + " / 10";
+    drawText(window, font, levelCountLine, 40.f, ITEM_START_Y + 2 * ITEM_SPACING, 22,
+        levelCountSelected ? sf::Color::Yellow : sf::Color::White);
+
+    drawText(window, font, "Сложность влияет на скорость шарика.", 40.f, 270.f, 16, sf::Color(180, 180, 180));
+    drawText(window, font, "Больше рядов блоков - длиннее первый уровень.", 40.f, 290.f, 16, sf::Color(180, 180, 180));
+    drawText(window, font, "С каждым уровнем рядов на одно больше (максимум 10).", 40.f, 310.f, 16, sf::Color(180, 180, 180));
+    drawText(window, font, "Вверх/вниз — выбор пункта, влево/вправо — изменить значение", 40.f, 350.f, 16, sf::Color(180, 180, 180));
+    drawText(window, font, "Мышь: клик ЛКМ увеличивает, колесо — оба направления", 40.f, 370.f, 16, sf::Color(180, 180, 180));
+    drawText(window, font, "Esc/Enter/Space/ПКМ — назад", 40.f, 390.f, 16, sf::Color(180, 180, 180));
 }
 
 std::unique_ptr<IState> DifficultyState::nextState()

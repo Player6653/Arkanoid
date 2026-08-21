@@ -1,6 +1,8 @@
 ﻿#pragma once
 #include <SFML/Graphics.hpp>
+#include <memory>
 #include "GameObject.h"
+#include "IPaddleState.h"
 
 // Платформа игрока.
 class Paddle : public GameObject {
@@ -15,11 +17,23 @@ public:
 
     sf::FloatRect getBounds() const override;
 
+    float getX() const;
+    void setX(float x);
+
+    // Левый край платформы так, как будто она сейчас обычной ширины (центр сохраняется).
+    float getNormalizedX() const;
+
+    // Состояние платформы — см. IPaddleState/WidePaddleState. Меняет ширину/скорость, сохраняя центр платформы на месте.
+    void setState(std::unique_ptr<IPaddleState> state);
+
 private:
     sf::RectangleShape m_shape;
-    float m_speed = 350.f; // пикселей в секунду, постоянная скорость (без ускорения).
+    sf::Vector2f m_baseSize;
+    float m_baseSpeed = 350.f; // пикселей в секунду, постоянная скорость (без ускорения).
+    float m_speed = m_baseSpeed; // фактическая скорость с учётом состояния платформы (см. setState()).
+    std::unique_ptr<IPaddleState> m_state;
 
-    // Чтобы отличать реальное движение мышт.
+    // Чтобы отличать реальное движение мышь.
     sf::Vector2i m_lastMousePos;
     bool m_mouseInitialized = false;
 

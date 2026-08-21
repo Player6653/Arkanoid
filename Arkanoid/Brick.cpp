@@ -25,6 +25,11 @@ void Brick::onHit()
     destroy();
 }
 
+void Brick::forceDestroy()
+{
+    destroy();
+}
+
 bool Brick::isDestroyed() const
 {
     return m_destroyed;
@@ -38,6 +43,21 @@ bool Brick::shouldBounceBall() const
 bool Brick::countsTowardWin() const
 {
     return true;
+}
+
+BrickKind Brick::getKind() const
+{
+    return BrickKind::Normal;
+}
+
+int Brick::getScoreValue() const
+{
+    return 10;
+}
+
+int Brick::getHitsRemaining() const
+{
+    return 1;
 }
 
 void Brick::destroy()

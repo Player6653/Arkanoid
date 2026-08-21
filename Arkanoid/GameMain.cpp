@@ -25,6 +25,10 @@ int main()
 
     StateManager stateManager(std::make_unique<MenuState>(context));
 
+    // Лимит FPS настраивается в SettingsState.
+    int appliedFpsLimit = settings.getFpsLimit();
+    window.setFramerateLimit(appliedFpsLimit);
+
     sf::Clock clock;
     while (window.isOpen())
     {
@@ -35,6 +39,11 @@ int main()
                 window.close();
 
             stateManager.handleInput(event);
+        }
+
+        if (settings.getFpsLimit() != appliedFpsLimit) {
+            appliedFpsLimit = settings.getFpsLimit();
+            window.setFramerateLimit(appliedFpsLimit);
         }
 
         sf::Time dt = clock.restart();

@@ -8,4 +8,7 @@ public:
 
     void onHit() override;
     bool shouldBounceBall() const override;
+
+    BrickKind getKind() const override;
+    int getScoreValue() const override;
 };

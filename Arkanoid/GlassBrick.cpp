@@ -16,3 +16,13 @@ bool GlassBrick::shouldBounceBall() const
     // Мяч пролетает сквозь стекло, не меняя направление.
     return false;
 }
+
+BrickKind GlassBrick::getKind() const
+{
+    return BrickKind::Glass;
+}
+
+int GlassBrick::getScoreValue() const
+{
+    return 5;
+}

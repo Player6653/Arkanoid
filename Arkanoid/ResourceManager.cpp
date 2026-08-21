@@ -15,10 +15,13 @@ void ResourceManager::loadAll()
     bool gameOverLoaded = m_gameOverBuffer.loadFromFile("Resources/Sounds/gameover.wav");
     assert(gameOverLoaded && "Не удалось загрузить Resources/Sounds/gameover.wav");
 
+    bool winLoaded = m_winBuffer.loadFromFile("Resources/Sounds/win.wav");
+    assert(winLoaded && "Не удалось загрузить Resources/Sounds/win.wav");
+
     bool swapLoaded = m_swapBuffer.loadFromFile("Resources/Sounds/swap.wav");
     assert(swapLoaded && "Не удалось загрузить Resources/Sounds/swap.wav");
 
-    // стрим с диска
+    // стрим с диска.
     bool menuMusicLoaded = m_menuMusic.openFromFile("Resources/Sounds/mainmenu.wav");
     assert(menuMusicLoaded && "Не удалось загрузить Resources/Sounds/mainmenu.wav");
     m_menuMusic.setLoop(true);
@@ -46,6 +49,11 @@ sf::SoundBuffer& ResourceManager::getLineClearBuffer()
 sf::SoundBuffer& ResourceManager::getGameOverBuffer()
 {
     return m_gameOverBuffer;
+}
+
+sf::SoundBuffer& ResourceManager::getWinBuffer()
+{
+    return m_winBuffer;
 }
 
 sf::SoundBuffer& ResourceManager::getSwapBuffer()
